@@ -1,52 +1,91 @@
 <html>
 <template>
-  <div class="actions-container">
-    <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default" id="add-element">Add element</button>
-      <button type="button" class="btn btn-default" id="remove-element">Remove element</button>
-      <button type="button" class="btn btn-default" id="reset-list">Reset list</button>
-    </div>
-
-    <input type="checkbox" id="filter-list"></input>
-    <label for="filter-list" id="filter-list-label">Filter odds</label>
-
-    <select name="filters" id="filters">
-        <option value="none">No filter</option>
-        <option value="odds">Filter odds</option>
-        <option value="evens">Filter evens</option>
-    </select>
+  <div class="btn-group" role="group">
+    <button type="button" class="btn btn-default" id="add-element">Add element</button>
+    <button type="button" class="btn btn-default" id="remove-element">Remove element</button>
+    <button type="button" class="btn btn-default" id="reset-list">Reset list</button>
   </div>
+  <input type="checkbox" id="filter-list"></input>
+  <label for="filter-list">Filter odds</label>
 
-  <div class="container col-sm-12">
-    <div class="result col-sm-8"></div>
-    <div class="counter col-sm-4"></div>
+      <select name="filters" id="filters">
+          <option value="none">No filter</option>
+          <option value="odds">Filter odds</option>
+          <option value="evens">Filter evens</option>
+      </select>
+
+  <div class="col-sm-12">
+    <div class="result col-sm-6">
+    </div>
+    <div class="counter col-sm-6">
+    </div>
   </div>
 
   <script>
-    // Actions elements
     var addButton = document.getElementById("add-element");
     var removeButton = document.getElementById("remove-element");
     var resetButton = document.getElementById("reset-list");
     var filterCheckbox = document.getElementById("filter-list");
     var filtersSelect = document.getElementById("filters");
 
-    // Hide actions
-    addButton.style.display = "none";
-    removeButton.style.display = "none";
-    resetButton.style.display = "none";
     filterCheckbox.style.display = "none";
     document.getElementById("filter-list-label").style.display = "none";
-    filtersSelect.style.display = "none";
+    //filtersSelect.style.display = "none";
 
-    // Results elements
-    const result = document.querySelector(".result");
-    const counter = document.querySelector(".counter");
+    const webSocket$ = Rx.DOM.fromWebSocket(WS_URL);
+    const addClick$ = Rx.Observable.fromEvent(addButton, "click");
 
-    const list$ = Rx.Observable.empty();
+    const add$ = Rx.Observable.merge(
+      addClick$,
+      webSocket$.filter(event => event.data === "add")
+    ).map(() => function removeLast(acc) {
+      return [...acc, acc.length];
+    });
 
-    list$
-      .map(renderColoredList)
-      .subscribe(html => result.innerHTML = html);
+    const remove$ = Rx.Observable.merge(
+      Rx.Observable.fromEvent(removeButton, "click"),
+      webSocket$.filter(event => event.data === "remove")
+    ).map(() => function removeLast(acc) {
+      return acc.slice(0, acc.length - 1);
+    });
+
+    const reset$ = Rx.Observable.fromEvent(resetButton, "click")
+                                  .map(() => function removeLast(acc) {
+                                    return [];
+                                  });
+
+    // const filter$ = Rx.Observable.fromEvent(filterCheckbox, "click")
+    //                               .map(event => event.target.checked)
+    //                               .startWith(false)
+    //                               .map(val => val
+    //                                         ? isOdd
+    //                                         : null);
+
+    const FILTERS = {
+      none: null,
+      odds: i => i % 2 === 0,
+      evens: i => i % 2 !== 0
+    };
+    const filter$ = Rx.Observable.fromEvent(filtersSelect, "change")
+                          .map(event => event.target.value)
+                          .startWith("none")
+                          .map(name => FILTERS[name]);
+
+
+    const list$ = Rx.Observable.merge(add$, remove$, reset$)
+          .startWith([])
+          .scan((state, action) => action(state));
+
+    const filteredList$ = Rx.Observable.combineLatest(list$, filter$,
+        (list, filterFn) => filterFn ? list.filter(filterFn) : list);
+
+        filteredList$
+          .map(renderColoredList)
+          .subscribe(html => document.querySelector(".result").innerHTML = html);
+
+        filteredList$
+          .map(list => list.length)
+          .subscribe(val => document.querySelector(".counter").innerHTML = val)
 
   </script>
 </template>

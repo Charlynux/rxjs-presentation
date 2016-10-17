@@ -7,10 +7,23 @@
     <div id="text-result"></div>
 
     <script>
-      const textInput = document.querySelector('#text');
-      const textResult = document.querySelector('#text-result');
+      function callSpotify(query) {
+        return fetch("https://api.spotify.com/v1/search?type=artist&q=" + query + "*")
+                  .then(response => response.json())
+                  .then(json => json.artists.items)
+      }
 
-      const input$ = Rx.Observable.fromEvent(textInput, 'input');
+      var textInput = document.querySelector('#text');
+      var textResult = document.querySelector('#text-result');
+
+      Rx.Observable.fromEvent(textInput, 'input')
+              .map(event => event.target.value)
+              .filter(value => value.length > 3)
+              .debounce(250)
+              .flatMap(callSpotify)
+              .map(items => items.map(i => i.name))
+              .map(renderList)
+              .subscribe(value => textResult.innerHTML = value);
     </script>
   </template>
 </html>
