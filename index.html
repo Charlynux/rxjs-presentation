@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>RxJs Presentation</title>
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse" role="navigation">
+    <div>
+      <ul class="nav navbar-nav">
+        <li data-id="angular"><a href="#/angular">Angular-like example</a></li>
+        <li data-id="list"><a href="#/list">List of numbers</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="view"></div>
+
+  <script src="libs/router.js"></script>
+  <script src="libs/utils.js"></script>
+  <script src="examples/array.js"></script>
+
+  <script src="libs/rx.all.min.js"></script>
+  <!-- Just for WebSockets -->
+  <script src="libs/rx.dom.min.js"></script>
+
+  <!-- Router's views -->
+  <link rel="import" href="examples/angular.html" id="angular">
+  <link rel="import" href="examples/list.html" id="list">
+
+    <link rel="stylesheet" href="libs/bootstrap.css">
+    <link rel="stylesheet" href="styles/styles.css">
+</body>
+
+</html>

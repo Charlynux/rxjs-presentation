@@ -1,0 +1,53 @@
+<html>
+<template>
+  <div class="actions-container">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default" id="add-element">Add element</button>
+      <button type="button" class="btn btn-default" id="remove-element">Remove element</button>
+      <button type="button" class="btn btn-default" id="reset-list">Reset list</button>
+    </div>
+
+    <input type="checkbox" id="filter-list"></input>
+    <label for="filter-list" id="filter-list-label">Filter odds</label>
+
+    <select name="filters" id="filters">
+        <option value="none">No filter</option>
+        <option value="odds">Filter odds</option>
+        <option value="evens">Filter evens</option>
+    </select>
+  </div>
+
+  <div class="container col-sm-12">
+    <div class="result col-sm-8"></div>
+    <div class="counter col-sm-4"></div>
+  </div>
+
+  <script>
+    // Actions elements
+    var addButton = document.getElementById("add-element");
+    var removeButton = document.getElementById("remove-element");
+    var resetButton = document.getElementById("reset-list");
+    var filterCheckbox = document.getElementById("filter-list");
+    var filtersSelect = document.getElementById("filters");
+
+    // Hide actions
+    addButton.style.display = "none";
+    removeButton.style.display = "none";
+    resetButton.style.display = "none";
+    filterCheckbox.style.display = "none";
+    document.getElementById("filter-list-label").style.display = "none";
+    filtersSelect.style.display = "none";
+
+    // Results elements
+    const result = document.querySelector(".result");
+    const counter = document.querySelector(".counter");
+
+    const list$ = Rx.Observable.empty();
+
+    list$
+      .map(renderColoredList)
+      .subscribe(html => result.innerHTML = html);
+
+  </script>
+</template>
+</html>

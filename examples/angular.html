@@ -1,0 +1,16 @@
+<html>
+  <template>
+    <div class="form-group">
+      <input type="text" class="form-control" id="text">
+    </div>
+    <hr>
+    <div id="text-result"></div>
+
+    <script>
+      const textInput = document.querySelector('#text');
+      const textResult = document.querySelector('#text-result');
+
+      const input$ = Rx.Observable.fromEvent(textInput, 'input');
+    </script>
+  </template>
+</html>
